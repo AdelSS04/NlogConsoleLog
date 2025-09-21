@@ -1,0 +1,30 @@
+name: Simple Build Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  quick-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore and build
+      run: |
+        dotnet restore
+        dotnet build --configuration Release --no-restore
+    
+    - name: Quick verification
+      run: |
+        cd NLogShowcase
+        dotnet run --no-build --configuration Release -- --verify

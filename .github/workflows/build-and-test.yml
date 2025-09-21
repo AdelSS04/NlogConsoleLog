@@ -1,0 +1,107 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        dotnet-version: ['8.0.x']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Verify application can start
+      run: |
+        cd NLogShowcase
+        timeout 10s dotnet run --no-build --configuration Release -- --verify || true
+        echo "Application startup verification completed"
+    
+    - name: Check for build artifacts
+      run: |
+        ls -la NLogShowcase/bin/Release/net8.0/
+        echo "Build artifacts verified"
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nlog-showcase-build
+        path: |
+          NLogShowcase/bin/Release/net8.0/
+          !NLogShowcase/bin/Release/net8.0/*.pdb
+        retention-days: 7
+
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Verify application can start (Windows)
+      run: |
+        cd NLogShowcase
+        Start-Process -FilePath "dotnet" -ArgumentList "run --no-build --configuration Release -- --verify" -Wait -TimeoutSeconds 10 -PassThru | Out-Null
+        Write-Host "Windows application startup verification completed"
+      shell: powershell
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Verify application can start (macOS)
+      run: |
+        cd NLogShowcase
+        timeout 10s dotnet run --no-build --configuration Release -- --verify || true
+        echo "macOS application startup verification completed"

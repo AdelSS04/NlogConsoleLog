@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# NLog specific ignores
+logs/
+*.log
+internal-nlog*.txt
+file.txt
+
+# JetBrains Rider
+.idea/
+*.sln.iml

@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Verify application
+      run: |
+        cd NLogShowcase
+        dotnet run --no-build --configuration Release -- --verify
+    
+    - name: Publish for Windows
+      run: dotnet publish NLogShowcase/NLogShowcase.csproj -c Release -r win-x64 --self-contained -o ./publish/win-x64
+    
+    - name: Publish for Linux
+      run: dotnet publish NLogShowcase/NLogShowcase.csproj -c Release -r linux-x64 --self-contained -o ./publish/linux-x64
+    
+    - name: Publish for macOS
+      run: dotnet publish NLogShowcase/NLogShowcase.csproj -c Release -r osx-x64 --self-contained -o ./publish/osx-x64
+    
+    - name: Create Windows archive
+      run: |
+        cd ./publish/win-x64
+        zip -r ../../nlog-showcase-win-x64.zip .
+    
+    - name: Create Linux archive
+      run: |
+        cd ./publish/linux-x64
+        tar -czf ../../nlog-showcase-linux-x64.tar.gz .
+    
+    - name: Create macOS archive
+      run: |
+        cd ./publish/osx-x64
+        tar -czf ../../nlog-showcase-osx-x64.tar.gz .
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          nlog-showcase-win-x64.zip
+          nlog-showcase-linux-x64.tar.gz
+          nlog-showcase-osx-x64.tar.gz
+        body: |
+          ## NLog Showcase Release
+          
+          This release includes compiled binaries for:
+          - Windows x64 (self-contained)
+          - Linux x64 (self-contained)  
+          - macOS x64 (self-contained)
+          
+          ### Features
+          - Interactive menu with 11 different NLog demonstrations
+          - Multiple log targets (Console, File, JSON, etc.)
+          - Structured logging examples
+          - Exception handling patterns
+          - Performance monitoring demonstrations
+          
+          ### Usage
+          Extract the archive for your platform and run the executable.
+          Log files will be generated in a `logs/` folder.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
