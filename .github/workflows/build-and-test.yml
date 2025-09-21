@@ -80,8 +80,7 @@ jobs:
       run: |
         cd NLogShowcase
         dotnet run --no-build --configuration Release -- --verify
-        Write-Host "Windows application startup verification completed"
-      shell: powershell
+        echo "Windows application startup verification completed"
       timeout-minutes: 2
 
   build-macos:
