@@ -42,6 +42,7 @@ jobs:
         cd NLogShowcase
         timeout 10s dotnet run --no-build --configuration Release -- --verify || true
         echo "Application startup verification completed"
+      timeout-minutes: 2
     
     - name: Check for build artifacts
       run: |
@@ -78,9 +79,10 @@ jobs:
     - name: Verify application can start (Windows)
       run: |
         cd NLogShowcase
-        Start-Process -FilePath "dotnet" -ArgumentList "run --no-build --configuration Release -- --verify" -Wait -TimeoutSeconds 10 -PassThru | Out-Null
+        dotnet run --no-build --configuration Release -- --verify
         Write-Host "Windows application startup verification completed"
       shell: powershell
+      timeout-minutes: 2
 
   build-macos:
     runs-on: macos-latest
@@ -105,3 +107,4 @@ jobs:
         cd NLogShowcase
         timeout 10s dotnet run --no-build --configuration Release -- --verify || true
         echo "macOS application startup verification completed"
+      timeout-minutes: 2

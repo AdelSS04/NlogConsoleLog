@@ -28,6 +28,7 @@ jobs:
       run: |
         cd NLogShowcase
         dotnet run --no-build --configuration Release -- --verify
+      timeout-minutes: 2
     
     - name: Publish for Windows
       run: dotnet publish NLogShowcase/NLogShowcase.csproj -c Release -r win-x64 --self-contained -o ./publish/win-x64

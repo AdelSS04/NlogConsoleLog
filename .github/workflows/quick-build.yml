@@ -28,3 +28,4 @@ jobs:
       run: |
         cd NLogShowcase
         dotnet run --no-build --configuration Release -- --verify
+      timeout-minutes: 2
