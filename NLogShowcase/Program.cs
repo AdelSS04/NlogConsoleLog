@@ -12,7 +12,7 @@ namespace NLogShowcase
         {
             if (args.Contains("--verify"))
             {
-                await RunVerificationMode(args);
+                RunVerificationMode(args);
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace NLogShowcase
                     logging.AddNLog("nlog.config");
                 });
 
-        private static async Task RunVerificationMode(string[] args)
+        private static void RunVerificationMode(string[] args)
         {
             Console.WriteLine("Running NLog Showcase in verification mode...");
             
